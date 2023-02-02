@@ -1,0 +1,3 @@
+_target_: data.h5.H5CorpusEncodingDataset
+data_dir: ???
+max_len: null

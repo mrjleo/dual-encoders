@@ -1,0 +1,19 @@
+_target_: pytorch_lightning.Trainer
+deterministic: True
+precision: 16
+strategy: ddp
+accelerator: auto
+devices: -1
+max_epochs: 5
+callbacks:
+  - _target_: pytorch_lightning.callbacks.LearningRateMonitor
+  - _target_: pytorch_lightning.callbacks.EarlyStopping
+    monitor: val_KLDivergence
+    mode: min
+    patience: 0
+    verbose: True
+  - _target_: pytorch_lightning.callbacks.ModelCheckpoint
+    monitor: val_KLDivergence
+    mode: min
+    save_top_k: 1
+    verbose: True

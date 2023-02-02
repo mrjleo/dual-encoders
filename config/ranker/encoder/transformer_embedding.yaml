@@ -1,0 +1,11 @@
+tokenizer:
+  _target_: model.transformer.TransformerTokenizer
+  pretrained_model: ${..pretrained_model}
+  max_length: 512
+
+encoder:
+  _target_: model.transformer.TransformerEmbeddingEncoder
+  pretrained_model: ${..pretrained_model}
+  dense_layer_dim: null
+
+pretrained_model: bert-base-uncased

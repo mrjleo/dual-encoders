@@ -1,0 +1,25 @@
+defaults:
+  - _self_
+  - encoder@query_encoder: transformer
+  - encoder@doc_encoder: transformer
+
+model:
+  _target_: model.DualEncoder
+  lr: 1e-5
+  warmup_steps: 1000
+  temperature: 20
+  hparams:
+    projection_size: null
+    dropout: 0.1
+  query_encoder: ${..query_encoder.encoder}
+  doc_encoder: ${..doc_encoder.encoder}
+  freeze_doc_encoder: False
+  visualize_embeddings: False
+  compute_kl_div: False
+  num_embeddings: 200
+
+data_processor:
+  _target_: model.DualEncoderDataProcessor
+  query_tokenizer: ${..query_encoder.tokenizer}
+  doc_tokenizer: ${..doc_encoder.tokenizer}
+  char_limit: 10000
