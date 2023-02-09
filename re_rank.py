@@ -30,7 +30,8 @@ def main(config: DictConfig) -> None:
     orig_ids = list(map(orig_doc_ids.get, faiss_ids))
 
     LOGGER.info("reconstructing vectors")
-    vectors = faiss_index.reconstruct_n(0, faiss_ids.shape[0])
+    # the vectors are not necessarily in the same order as the ids, hence we need to permute
+    vectors = faiss_index.reconstruct_n(0, faiss_ids.shape[0])[faiss_ids]
 
     LOGGER.info("creating FF index")
     ff_index = InMemoryIndex(adapter, mode=Mode.MAXP)
