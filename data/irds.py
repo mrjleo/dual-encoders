@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from typing import Iterable, Union
 
@@ -6,6 +7,8 @@ from ranking_utils.datasets.trec import read_top_trec
 from ranking_utils.model.data import DataProcessor
 
 from data import EncodingDataset, EncodingInstance
+
+LOGGER = logging.getLogger(__name__)
 
 
 class IRDSCorpusEncodingDataset(EncodingDataset):
@@ -29,9 +32,10 @@ class IRDSCorpusEncodingDataset(EncodingDataset):
         super().__init__(data_processor, max_len)
         self.dataset = ir_datasets.load(dataset)
         self.content_attributes = content_attributes
+        self._it = self.dataset.docs_iter()
 
     def get_orig_id(self, int_id: int) -> str:
-        return self.dataset.docs_iter()[int_id].doc_id
+        return self._it[int_id].doc_id
 
     def _get_data(self) -> Iterable[EncodingInstance]:
         for index, doc in enumerate(self.dataset.docs_iter()):
@@ -64,6 +68,7 @@ class IRDSPartialCorpusEncodingDataset(IRDSCorpusEncodingDataset):
 
         # we support Path and str to make config with hydra easier
         self.doc_ids = set.union(*read_top_trec(Path(trec_runfile)).values())
+        LOGGER.info(f"encoding {len(self.doc_ids)} documents")
 
     def _get_data(self) -> Iterable[EncodingInstance]:
         for index, doc in enumerate(

@@ -1,4 +1,4 @@
 _target_: data.irds.IRDSCorpusEncodingDataset
 dataset: ???
-max_len: null
 content_attributes: [text]
+max_len: null
