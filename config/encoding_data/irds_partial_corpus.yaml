@@ -1,0 +1,5 @@
+_target_: data.irds.IRDSPartialCorpusEncodingDataset
+dataset: ???
+trec_runfile: ???
+content_attributes: [text]
+max_len: null
