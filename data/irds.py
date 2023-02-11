@@ -45,7 +45,8 @@ class IRDSCorpusEncodingDataset(EncodingDataset):
 
 class IRDSPartialCorpusEncodingDataset(IRDSCorpusEncodingDataset):
     """Encoding dataset for corpora from the ir_datasets library.
-    Encodes only documents that appear in a provided TREC runfile."""
+    Encodes only documents that appear in a provided TREC runfile.
+    """
 
     def __init__(
         self,
@@ -68,6 +69,7 @@ class IRDSPartialCorpusEncodingDataset(IRDSCorpusEncodingDataset):
 
         # we support Path and str to make config with hydra easier
         self.doc_ids = set.union(*read_top_trec(Path(trec_runfile)).values())
+        assert len(self.doc_ids) > 0
         LOGGER.info(f"encoding {len(self.doc_ids)} documents")
 
     def _get_data(self) -> Iterable[EncodingInstance]:
