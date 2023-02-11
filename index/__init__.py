@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Union
 
-import faiss
+import numpy as np
 from fast_forward.encoder import QueryEncoder as FFQueryEncoder
 from fast_forward.index import InMemoryIndex, Mode
 
@@ -31,8 +31,9 @@ def faiss_to_ff(
     index_dir = Path(index_dir)
     LOGGER.info(f"reading {index_dir}")
     faiss_index, orig_doc_ids = read_faiss_index(index_dir)
-    faiss_ids = faiss.vector_to_array(faiss_index.id_map)
-    orig_ids = list(map(orig_doc_ids.get, faiss_ids))
+    faiss_ids, orig_ids = zip(*orig_doc_ids.items())
+    faiss_ids = np.array(faiss_ids)
+    orig_ids = list(orig_ids)
 
     LOGGER.info("reconstructing vectors")
     # the vectors are not necessarily in the same order as the ids, hence we need to permute

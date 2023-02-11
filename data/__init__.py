@@ -1,15 +1,15 @@
 import abc
-from typing import Any, Iterable, Tuple
+from typing import Any, Iterable, List, Tuple
 
 import torch
 from ranking_utils.model.data import DataProcessor
 from torch.utils.data import IterableDataset
 
-EncodingInstance = Tuple[int, str]
+EncodingInstance = Tuple[str, str]
 EncodingModelInput = Any
-EncodingInput = Tuple[int, EncodingModelInput]
+EncodingInput = Tuple[str, EncodingModelInput]
 EncodingModelBatch = Any
-EncodingBatch = Tuple[torch.Tensor, EncodingModelBatch]
+EncodingBatch = Tuple[List[str], EncodingModelBatch]
 
 
 class EncodingDataset(IterableDataset, abc.ABC):
@@ -25,18 +25,6 @@ class EncodingDataset(IterableDataset, abc.ABC):
         super().__init__()
         self.data_processor = data_processor
         self.max_len = max_len
-
-    @abc.abstractmethod
-    def get_orig_id(self, int_id: int) -> str:
-        """Return the original ID of an item (i.e. query or document).
-
-        Args:
-            int_id (int): The internal integer ID.
-
-        Returns:
-            str: The original ID.
-        """
-        pass
 
     @abc.abstractmethod
     def _get_data(self) -> Iterable[EncodingInstance]:
@@ -70,7 +58,7 @@ class EncodingDataset(IterableDataset, abc.ABC):
         """
         worker_info = torch.utils.data.get_worker_info()
 
-        for i, (index, item) in enumerate(self._get_data()):
+        for i, (id, item) in enumerate(self._get_data()):
 
             # if this belongs to another worker, skip
             if (
@@ -79,7 +67,7 @@ class EncodingDataset(IterableDataset, abc.ABC):
             ):
                 continue
             for s in self._split(item):
-                yield index, self.data_processor.get_encoding_input(s)
+                yield id, self.data_processor.get_encoding_input(s)
 
     def collate_fn(self, inputs: Iterable[EncodingInput]) -> EncodingBatch:
         """Collate inputs into a batch.
@@ -90,8 +78,8 @@ class EncodingDataset(IterableDataset, abc.ABC):
         Returns:
             EncodingBatch: The resulting batch.
         """
-        indices, inputs = zip(*inputs)
+        ids, inputs = zip(*inputs)
         return (
-            torch.IntTensor(indices),
+            list(ids),
             self.data_processor.get_encoding_batch(inputs),
         )

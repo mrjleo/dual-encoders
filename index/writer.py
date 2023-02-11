@@ -8,8 +8,6 @@ import faiss
 import numpy as np
 from fast_forward.index import InMemoryIndex
 
-from data import EncodingDataset
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -25,7 +23,7 @@ class IndexWriter(abc.ABC):
         """Construct the index using items from the queue.
 
         Args:
-            q (Queue): Queue of tuples of document representations and IDs, i.e. Tuple[Tensor, Sequence[str]].
+            q (Queue): Queue of tuples of document IDs and representations, i.e. Tuple[Sequence[str], Sequence[str]].
         """
         pass
 
@@ -42,32 +40,29 @@ class IndexWriter(abc.ABC):
 class FAISSIndexWriter(IndexWriter):
     """Writer for FAISS indexes."""
 
-    def __init__(self, emb_dim: int, dataset: EncodingDataset) -> None:
+    def __init__(self, emb_dim: int) -> None:
         """Constructor.
 
         Args:
             emb_dim (int): Dimension for vector representations.
-            dataset (EncodingDataset): Encoding dataset to get document IDs from.
         """
         super().__init__()
         self.emb_dim = emb_dim
-        self.dataset = dataset
 
-        self.index = faiss.IndexIDMap2(
-            faiss.index_factory(emb_dim, "Flat", faiss.METRIC_INNER_PRODUCT)
-        )
-        self.doc_ids = {}
+        self.index = faiss.index_factory(emb_dim, "Flat", faiss.METRIC_INNER_PRODUCT)
+        self.doc_ids = []
 
     def __call__(self, q: Queue) -> None:
         while True:
             item = q.get()
+
             # sentinel
             if item is None:
                 break
 
-            out, ids = item
-            self.index.add_with_ids(out, ids)
-            self.doc_ids.update({id: self.dataset.get_orig_id(int(id)) for id in ids})
+            ids, out = item
+            self.doc_ids.extend(ids)
+            self.index.add(out)
 
     def save_index(self, target_dir: Path) -> None:
         index_out = target_dir / "index.bin"
@@ -77,7 +72,7 @@ class FAISSIndexWriter(IndexWriter):
         with open(doc_ids_out, "w", encoding="utf-8", newline="") as fp:
             writer = csv.writer(fp)
             writer.writerow(("id", "orig_doc_id"))
-            for id, orig_id in self.doc_ids.items():
+            for id, orig_id in enumerate(self.doc_ids):
                 writer.writerow((id, orig_id))
 
         LOGGER.info(f"writing {index_out}")
@@ -87,29 +82,28 @@ class FAISSIndexWriter(IndexWriter):
 class FastForwardIndexWriter(IndexWriter):
     """Factory for Fast-Forward indexes."""
 
-    def __init__(self, emb_dim: int, dataset: EncodingDataset) -> None:
+    def __init__(self, emb_dim: int) -> None:
         """Constructor.
 
         Args:
             emb_dim (int): Dimension for vector representations.
-            dataset (EncodingDataset): Encoding dataset to get document IDs from.
         """
         super().__init__()
         self.emb_dim = emb_dim
-        self.dataset = dataset
         self.vectors = []
         self.doc_ids = []
 
     def __call__(self, q: Queue) -> None:
         while True:
             item = q.get()
+
             # sentinel
             if item is None:
                 break
 
-            out, ids = item
+            ids, out = item
             self.vectors.append(out)
-            self.doc_ids.extend([self.dataset.get_orig_id(int(id)) for id in ids])
+            self.doc_ids.extend(ids)
 
     def save_index(self, target_dir: Path) -> None:
         index = InMemoryIndex()

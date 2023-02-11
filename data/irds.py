@@ -32,15 +32,11 @@ class IRDSCorpusEncodingDataset(EncodingDataset):
         super().__init__(data_processor, max_len)
         self.dataset = ir_datasets.load(dataset)
         self.content_attributes = content_attributes
-        self._it = self.dataset.docs_iter()
-
-    def get_orig_id(self, int_id: int) -> str:
-        return self._it[int_id].doc_id
 
     def _get_data(self) -> Iterable[EncodingInstance]:
-        for index, doc in enumerate(self.dataset.docs_iter()):
+        for doc in self.dataset.docs_iter():
             content = [getattr(doc, attr) for attr in self.content_attributes]
-            yield index, ". ".join(content)
+            yield doc.doc_id, ". ".join(content)
 
 
 class IRDSPartialCorpusEncodingDataset(IRDSCorpusEncodingDataset):
@@ -73,8 +69,6 @@ class IRDSPartialCorpusEncodingDataset(IRDSCorpusEncodingDataset):
         LOGGER.info(f"encoding {len(self.doc_ids)} documents")
 
     def _get_data(self) -> Iterable[EncodingInstance]:
-        for index, doc in enumerate(
-            self.dataset.docs_store().get_many_iter(self.doc_ids)
-        ):
+        for doc in self.dataset.docs_store().get_many_iter(self.doc_ids):
             content = [getattr(doc, attr) for attr in self.content_attributes]
-            yield index, ". ".join(content)
+            yield doc.doc_id, ". ".join(content)

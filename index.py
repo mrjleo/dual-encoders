@@ -31,7 +31,6 @@ def main(config: DictConfig) -> None:
     index_writer = instantiate(
         config.index_writer,
         emb_dim=ranker.module.embedding_dimension,
-        dataset=dataset,
     )
 
     q = Queue()
@@ -42,7 +41,6 @@ def main(config: DictConfig) -> None:
     t_index.start()
 
     for ids, d_inputs in tqdm(data_loader):
-        ids = ids.numpy()
         with torch.no_grad():
             out = (
                 ranker(
@@ -53,7 +51,7 @@ def main(config: DictConfig) -> None:
                 .cpu()
                 .numpy()
             )
-        q.put((out, ids))
+        q.put((ids, out))
 
     # sentinel
     q.put(None)
