@@ -5,37 +5,25 @@ import csv
 import logging
 from pathlib import Path
 
-import faiss
 import hydra
 import ir_datasets
 import ir_measures
-from fast_forward.index import InMemoryIndex, Mode
 from fast_forward.ranking import Ranking
+from hydra.utils import call
 from omegaconf import DictConfig
 
-from util import QueryEncoderAdapter, read_faiss_index
+from util import QueryEncoderAdapter
 
 LOGGER = logging.getLogger(__name__)
 
 
 @hydra.main(config_path="config", config_name="re_ranking", version_base="1.3")
 def main(config: DictConfig) -> None:
-    LOGGER.info(f"reading {config.ckpt_file}")
+    LOGGER.info(f"loading {config.ckpt_file}")
     adapter = QueryEncoderAdapter(config.query_encoder, config.ckpt_file, config.device)
 
-    index_dir = Path(config.faiss_index_dir)
-    LOGGER.info(f"reading {index_dir}")
-    faiss_index, orig_doc_ids = read_faiss_index(index_dir)
-    faiss_ids = faiss.vector_to_array(faiss_index.id_map)
-    orig_ids = list(map(orig_doc_ids.get, faiss_ids))
-
-    LOGGER.info("reconstructing vectors")
-    # the vectors are not necessarily in the same order as the ids, hence we need to permute
-    vectors = faiss_index.reconstruct_n(0, faiss_ids.shape[0])[faiss_ids]
-
-    LOGGER.info("creating FF index")
-    ff_index = InMemoryIndex(adapter, mode=Mode.MAXP)
-    ff_index.add(vectors, doc_ids=orig_ids)
+    LOGGER.info("loading index")
+    ff_index = call(config.ff_index_reader, query_encoder=adapter)
 
     LOGGER.info(f"reading {config.sparse_scores_file}")
     sparse_scores = Ranking.from_file(Path(config.sparse_scores_file))
