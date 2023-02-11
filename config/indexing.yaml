@@ -2,6 +2,7 @@ defaults:
   - _self_
   - ranker: dual_encoder
   - encoding_data: h5_corpus
+  - index_writer: faiss
 
 device: cuda
 ckpt_path: ???
