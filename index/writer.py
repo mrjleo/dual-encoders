@@ -3,6 +3,7 @@ import csv
 import logging
 from pathlib import Path
 from queue import Queue
+from typing import List
 
 import faiss
 import numpy as np
@@ -40,17 +41,8 @@ class IndexWriter(abc.ABC):
 class FAISSIndexWriter(IndexWriter):
     """Writer for FAISS indexes."""
 
-    def __init__(self, emb_dim: int) -> None:
-        """Constructor.
-
-        Args:
-            emb_dim (int): Dimension for vector representations.
-        """
-        super().__init__()
-        self.emb_dim = emb_dim
-
-        self.index = faiss.index_factory(emb_dim, "Flat", faiss.METRIC_INNER_PRODUCT)
-        self.doc_ids = []
+    index: faiss.Index = None
+    doc_ids: List[str] = []
 
     def __call__(self, q: Queue) -> None:
         while True:
@@ -61,6 +53,10 @@ class FAISSIndexWriter(IndexWriter):
                 break
 
             ids, out = item
+            if self.index is None:
+                self.index = faiss.index_factory(
+                    out.shape[-1], "Flat", faiss.METRIC_INNER_PRODUCT
+                )
             self.doc_ids.extend(ids)
             self.index.add(out)
 
@@ -80,18 +76,10 @@ class FAISSIndexWriter(IndexWriter):
 
 
 class FastForwardIndexWriter(IndexWriter):
-    """Factory for Fast-Forward indexes."""
+    """Writer for Fast-Forward indexes."""
 
-    def __init__(self, emb_dim: int) -> None:
-        """Constructor.
-
-        Args:
-            emb_dim (int): Dimension for vector representations.
-        """
-        super().__init__()
-        self.emb_dim = emb_dim
-        self.vectors = []
-        self.doc_ids = []
+    vectors: List[np.ndarray] = []
+    doc_ids: List[str] = []
 
     def __call__(self, q: Queue) -> None:
         while True:

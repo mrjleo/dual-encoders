@@ -71,8 +71,7 @@ class TransformerEncoder(Encoder):
 
 
 class TransformerEmbeddingEncoder(Encoder):
-    """
-    Encodes a string using the average of the embedded tokens.
+    """Encodes a string using the average of the embedded tokens.
     Static token embeddings are obtained from a pre-trained Transformer model.
     """
 

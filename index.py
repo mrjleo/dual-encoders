@@ -27,11 +27,7 @@ def main(config: DictConfig) -> None:
     data_loader = instantiate(
         config.data_loader, dataset=dataset, collate_fn=dataset.collate_fn
     )
-
-    index_writer = instantiate(
-        config.index_writer,
-        emb_dim=ranker.module.embedding_dimension,
-    )
+    index_writer = instantiate(config.index_writer)
 
     q = Queue()
     t_index = Thread(
@@ -41,17 +37,10 @@ def main(config: DictConfig) -> None:
     t_index.start()
 
     for ids, d_inputs in tqdm(data_loader):
+        d_inputs = {k: v.to(config.device) for k, v in d_inputs.items()}
         with torch.no_grad():
-            out = (
-                ranker(
-                    {k: v.to(config.device) for k, v in d_inputs.items()},
-                    action="encode_docs",
-                )
-                .detach()
-                .cpu()
-                .numpy()
-            )
-        q.put((ids, out))
+            out = ranker(d_inputs, action="encode_docs")
+        q.put((ids, out.detach().cpu().numpy()))
 
     # sentinel
     q.put(None)
