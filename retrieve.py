@@ -30,6 +30,7 @@ def retrieve(
     batch_size: int,
 ) -> Dict[str, Dict[str, float]]:
     """Retrieve documents for the queries of a specified dataset.
+    If a document is retrieved multiple times, the highest score is kept (maxP).
 
     Args:
         encoder (FFQueryEncoder): The query encoder.
@@ -43,7 +44,7 @@ def retrieve(
         Dict[str, Dict[str, float]]: The resulting TREC run.
     """
     all_queries = dataset.queries_iter()
-    run = defaultdict(dict)
+    run = defaultdict(lambda: defaultdict(lambda: float("-inf")))
     for batch in tqdm(batch_iter(all_queries, batch_size)):
         ids, queries = zip(*batch)
         out = encoder.encode(queries)
@@ -51,7 +52,9 @@ def retrieve(
         for q_id, doc_ids, scores in zip(ids, I, D):
             for doc_id, score in zip(doc_ids, scores):
                 orig_doc_id = orig_doc_ids[doc_id]
-                run[q_id][orig_doc_id] = float(score)
+
+                # maxP
+                run[q_id][orig_doc_id] = max(float(score), run[q_id][orig_doc_id])
     return run
 
 
