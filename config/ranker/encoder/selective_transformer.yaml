@@ -1,0 +1,10 @@
+tokenizer:
+  _target_: model.transformer.TransformerTokenizer
+  pretrained_model: ${..pretrained_model}
+  max_length: 512
+
+encoder:
+  _target_: model.selective_transformer.SelectiveTransformerEncoder
+  pretrained_model: ${..pretrained_model}
+
+pretrained_model: bert-base-uncased
