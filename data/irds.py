@@ -66,7 +66,7 @@ class IRDSPartialCorpusEncodingDataset(IRDSCorpusEncodingDataset):
         # we support Path and str to make config with hydra easier
         self.doc_ids = set.union(*read_top_trec(Path(trec_runfile)).values())
         assert len(self.doc_ids) > 0
-        LOGGER.info(f"encoding {len(self.doc_ids)} documents")
+        LOGGER.info("encoding %s documents", len(self.doc_ids))
 
     def _get_data(self) -> Iterable[EncodingInstance]:
         for doc in self.dataset.docs_store().get_many_iter(self.doc_ids):

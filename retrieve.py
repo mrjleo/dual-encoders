@@ -60,11 +60,11 @@ def retrieve(
 
 @hydra.main(config_path="config", config_name="retrieval", version_base="1.3")
 def main(config: DictConfig) -> None:
-    LOGGER.info(f"reading {config.ckpt_file}")
+    LOGGER.info("reading %s", config.ckpt_file)
     encoder = QueryEncoderAdapter(config.query_encoder, config.ckpt_file, config.device)
 
     index_dir = Path(config.index_dir)
-    LOGGER.info(f"reading {index_dir}")
+    LOGGER.info("reading %s", index_dir)
     index, orig_doc_ids = read_faiss_index(index_dir)
 
     measures = list(map(ir_measures.parse_measure, config.metrics))

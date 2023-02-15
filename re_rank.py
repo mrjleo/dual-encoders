@@ -19,18 +19,18 @@ LOGGER = logging.getLogger(__name__)
 
 @hydra.main(config_path="config", config_name="re_ranking", version_base="1.3")
 def main(config: DictConfig) -> None:
-    LOGGER.info(f"loading {config.ckpt_file}")
+    LOGGER.info("loading %s", config.ckpt_file)
     adapter = QueryEncoderAdapter(config.query_encoder, config.ckpt_file, config.device)
 
     LOGGER.info("loading index")
     ff_index = call(config.ff_index_reader, query_encoder=adapter)
 
-    LOGGER.info(f"reading {config.sparse_scores_file}")
+    LOGGER.info("reading %s", config.sparse_scores_file)
     sparse_scores = Ranking.from_file(Path(config.sparse_scores_file))
     if config.cutoff_sparse is not None:
         sparse_scores.cut(config.cutoff_sparse)
 
-    LOGGER.info(f"loading {config.dataset}")
+    LOGGER.info("loading %s", config.dataset)
     dataset = ir_datasets.load(config.dataset)
     queries = {query.query_id: query.text for query in dataset.queries_iter()}
 
@@ -52,7 +52,7 @@ def main(config: DictConfig) -> None:
         for alpha, ranking in ff_result.items():
             ranking.name = f"{config.model_id}_{str(alpha)}"
             target = Path(f"{ranking.name}.tsv")
-            LOGGER.info(f"writing {target}")
+            LOGGER.info("writing %s", target)
             ranking.save(target)
 
             row = ir_measures.calc_aggregate(

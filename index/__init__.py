@@ -29,7 +29,7 @@ def faiss_to_ff(
         InMemoryIndex: The FF index.
     """
     index_dir = Path(index_dir)
-    LOGGER.info(f"reading {index_dir}")
+    LOGGER.info("reading %s", index_dir)
     faiss_index, orig_doc_ids = read_faiss_index(index_dir)
     faiss_ids, orig_ids = zip(*orig_doc_ids.items())
     faiss_ids = np.array(faiss_ids)
@@ -63,7 +63,7 @@ def read_ff_index(
         InMemoryIndex: The FF index.
     """
     index_dir = Path(index_dir)
-    LOGGER.info(f"reading {index_dir}")
+    LOGGER.info("reading %s", index_dir)
     return InMemoryIndex.from_disk(
         index_dir / "index.pkl", query_encoder, mode, encoder_batch_size
     )

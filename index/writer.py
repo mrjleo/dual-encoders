@@ -64,14 +64,14 @@ class FAISSIndexWriter(IndexWriter):
         index_out = target_dir / "index.bin"
         doc_ids_out = target_dir / "doc_ids.csv"
 
-        LOGGER.info(f"writing {doc_ids_out}")
+        LOGGER.info("writing %s", doc_ids_out)
         with open(doc_ids_out, "w", encoding="utf-8", newline="") as fp:
             writer = csv.writer(fp)
             writer.writerow(("id", "orig_doc_id"))
             for id, orig_id in enumerate(self.doc_ids):
                 writer.writerow((id, orig_id))
 
-        LOGGER.info(f"writing {index_out}")
+        LOGGER.info("writing %s", index_out)
         faiss.write_index(self.index, str(index_out))
 
 
@@ -97,5 +97,5 @@ class FastForwardIndexWriter(IndexWriter):
         index = InMemoryIndex()
         index.add(np.vstack(self.vectors), doc_ids=self.doc_ids)
         index_out = target_dir / "index.pkl"
-        LOGGER.info(f"writing {index_out}")
+        LOGGER.info("writing %s", index_out)
         index.save(index_out)
