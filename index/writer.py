@@ -24,7 +24,7 @@ class IndexWriter(abc.ABC):
         """Construct the index using items from the queue.
 
         Args:
-            q (Queue): Queue of tuples of document IDs and representations, i.e. Tuple[Sequence[str], Sequence[str]].
+            q (Queue): Queue of tuples of document IDs and representations, i.e. Tuple[Sequence[str], torch.Tensor].
         """
         pass
 
