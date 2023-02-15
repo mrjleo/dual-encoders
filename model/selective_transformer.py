@@ -46,13 +46,13 @@ class SelectiveTransformerEncoder(Encoder):
             torch.nn.Sigmoid(),
         )
 
-        # the selector is always frozen during fine-tuning
-        for p in self.selector.parameters():
-            p.requires_grad = False
-
         if weights is not None:
             LOGGER.info("loading state dict from %s", weights)
             self.load_state_dict(torch.load(weights)["state_dict"])
+
+        # the selector is always frozen during fine-tuning
+        for p in self.selector.parameters():
+            p.requires_grad = False
 
     def _extract_fill_batch(
         self,

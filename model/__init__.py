@@ -174,8 +174,9 @@ class DualEncoder(Ranker):
         self.temperature = temperature
         self.save_hyperparameters(hparams)
 
-        for p in self.doc_encoder.parameters():
-            p.requires_grad = not freeze_doc_encoder
+        if freeze_doc_encoder:
+            for p in self.doc_encoder.parameters():
+                p.requires_grad = False
 
         self.visualize_embeddings = visualize_embeddings
         self.compute_kl_div = compute_kl_div
