@@ -32,7 +32,7 @@ def main(config: DictConfig) -> None:
 
     LOGGER.info(f"loading {config.dataset}")
     dataset = ir_datasets.load(config.dataset)
-    queries = {q_id: q for q_id, q in dataset.queries_iter()}
+    queries = {query.query_id: query.text for query in dataset.queries_iter()}
 
     LOGGER.info("computing scores")
     ff_result = ff_index.get_scores(
