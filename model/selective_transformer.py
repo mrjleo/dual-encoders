@@ -20,7 +20,6 @@ class SelectiveTransformerEncoder(Encoder):
     def __init__(
         self,
         pretrained_model: str,
-        dropout: float = 0.1,
         delta: float = 0.7,
         weights: Union[Path, str] = None,
     ):
@@ -28,15 +27,12 @@ class SelectiveTransformerEncoder(Encoder):
 
         Args:
             pretrained_model (str): Pre-trained model on the HuggingFace Hub.
-            dropout (float, optional): Dropout rate. Defaults to 0.1.
             delta (float, optional): Percentage of tokens to keep. Defaults to 0.7.
             weights (Union[Path, str], optional): Initial weights to load. Defaults to None.
         """
         super().__init__()
-        self.delta = delta
-
         self.model = AutoModel.from_pretrained(pretrained_model, return_dict=True)
-        self.dropout = torch.nn.Dropout(dropout)
+        self.delta = delta
 
         dim = self.model.config.hidden_size
         self.selector = torch.nn.Sequential(
@@ -122,15 +118,12 @@ class SelectiveTransformerEncoder(Encoder):
         ) = self._extract_fill_batch(
             inputs_embeds, attention_mask, token_type_ids, self.selector(inputs_embeds)
         )
-
-        cls_out = self.model(
+        return self.model(
             inputs_embeds=inputs_embeds,
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
             position_ids=position_ids,
         )["last_hidden_state"][:, 0]
-
-        return self.dropout(cls_out)
 
     @property
     def embedding_dimension(self) -> int:
