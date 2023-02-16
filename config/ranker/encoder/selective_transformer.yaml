@@ -6,7 +6,7 @@ tokenizer:
 encoder:
   _target_: model.selective_transformer.SelectiveTransformerEncoder
   pretrained_model: ${..pretrained_model}
-  delta: 0.7
-  weights: null
+  delta: 0.75
+  selector_weights: null
 
 pretrained_model: bert-base-uncased

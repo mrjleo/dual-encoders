@@ -20,15 +20,15 @@ class SelectiveTransformerEncoder(Encoder):
     def __init__(
         self,
         pretrained_model: str,
-        delta: float = 0.7,
-        weights: Union[Path, str] = None,
+        delta: float = 0.75,
+        selector_weights: Union[Path, str] = None,
     ):
         """Constructor.
 
         Args:
             pretrained_model (str): Pre-trained model on the HuggingFace Hub.
-            delta (float, optional): Percentage of tokens to keep. Defaults to 0.7.
-            weights (Union[Path, str], optional): Initial weights to load. Defaults to None.
+            delta (float, optional): Percentage of tokens to keep. Defaults to 0.75.
+            selector_weights (Union[Path, str], optional): Checkpoint that contains selector weights to load. Defaults to None.
         """
         super().__init__()
         self.model = AutoModel.from_pretrained(pretrained_model, return_dict=True)
@@ -46,9 +46,15 @@ class SelectiveTransformerEncoder(Encoder):
             torch.nn.Sigmoid(),
         )
 
-        if weights is not None:
-            LOGGER.info("loading state dict from %s", weights)
-            self.load_state_dict(torch.load(weights)["state_dict"])
+        if selector_weights is not None:
+            LOGGER.info("loading state dict from %s", selector_weights)
+            selector_sd = {
+                k: v
+                for k, v in torch.load(selector_weights)["state_dict"].items()
+                if k.startswith("selector.")
+            }
+            LOGGER.info("loading weights: %s", selector_sd.keys())
+            self.load_state_dict(selector_sd, strict=False)
 
         # the selector is always frozen during fine-tuning
         for p in self.selector.parameters():
