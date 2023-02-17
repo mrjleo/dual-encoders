@@ -65,7 +65,10 @@ class IRDSPartialCorpusEncodingDataset(IRDSCorpusEncodingDataset):
 
         # we support Path and str to make config with hydra easier
         with open(trec_runfile, encoding="utf-8", newline="") as fp:
-            self.doc_ids = {row[2] for row in csv.reader(fp, delimiter="\t")}
+            dialect = csv.Sniffer().sniff(fp.read(1024), delimiters=" \t")
+            fp.seek(0)
+            self.doc_ids = {row[2] for row in csv.reader(fp, dialect)}
+            print(self.doc_ids)
         assert len(self.doc_ids) > 0
         LOGGER.info("encoding %s documents", len(self.doc_ids))
 
