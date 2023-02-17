@@ -1,3 +1,4 @@
+import csv
 import logging
 from pathlib import Path
 from typing import Iterable, Union
@@ -64,7 +65,8 @@ class IRDSPartialCorpusEncodingDataset(IRDSCorpusEncodingDataset):
         super().__init__(data_processor, dataset, content_attributes, max_len)
 
         # we support Path and str to make config with hydra easier
-        self.doc_ids = set.union(*read_top_trec(Path(trec_runfile)).values())
+        with open(trec_runfile, encoding="utf-8", newline="") as fp:
+            self.doc_ids = {row[2] for row in csv.reader(fp, delimiter="\t")}
         assert len(self.doc_ids) > 0
         LOGGER.info("encoding %s documents", len(self.doc_ids))
 
