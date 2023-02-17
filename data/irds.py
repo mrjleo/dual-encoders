@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Iterable, Union
 
 import ir_datasets
-from ranking_utils.datasets.trec import read_top_trec
 from ranking_utils.model.data import DataProcessor
 
 from data import EncodingDataset, EncodingInstance
