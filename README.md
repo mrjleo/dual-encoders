@@ -1,7 +1,7 @@
-# Dense Retrieval
+# Dual-Encoders for IR
 This code allows training of dual-encoder models for retrieval or ranking. The query and document encoder are the same model and share weights.
 
-**This is work in progress. Documentation and readme are incomplete.**
+**Documentation and readme are incomplete.**
 
 ## Environment
 You can use the file `conda_env.txt` to create a conda environment with the required packages:
