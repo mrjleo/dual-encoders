@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 
-from pathlib import Path
 from queue import Queue
 from threading import Thread
 
@@ -46,7 +45,7 @@ def main(config: DictConfig) -> None:
     q.put(None)
 
     t_index.join()
-    index_writer.save_index(Path.cwd())
+    index_writer.finalize_index()
 
 
 if __name__ == "__main__":

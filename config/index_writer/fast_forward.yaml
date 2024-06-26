@@ -1,1 +1,1 @@
-_target_: index.writer.FastForwardIndexWriter
+_target_: util.index_writer.FastForwardIndexWriter
