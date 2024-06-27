@@ -51,16 +51,16 @@ def main(config: DictConfig) -> None:
         LOGGER.info("computing %s", measures)
         results = ir_measures.calc_aggregate(measures, dataset.qrels_iter(), run)
 
-    results_file = Path.cwd() / f"retrieval_results_{config.name}.csv"
-    LOGGER.info("writing %s", results_file)
-    with open(results_file, "w", encoding="utf-8", newline="") as fp:
-        writer = csv.DictWriter(fp, ["type", "name", "dataset", "k"] + measures)
-        writer.writeheader()
-        results["type"] = "retrieval"
-        results["name"] = config.name
-        results["dataset"] = config.dataset
-        results["k"] = config.k
-        writer.writerow(results)
+        results_file = Path.cwd() / f"retrieval_results_{config.name}.csv"
+        LOGGER.info("writing %s", results_file)
+        with open(results_file, "w", encoding="utf-8", newline="") as fp:
+            writer = csv.DictWriter(fp, ["type", "name", "dataset", "k"] + measures)
+            writer.writeheader()
+            results["type"] = "retrieval"
+            results["name"] = config.name
+            results["dataset"] = config.dataset
+            results["k"] = config.k
+            writer.writerow(results)
 
 
 if __name__ == "__main__":
