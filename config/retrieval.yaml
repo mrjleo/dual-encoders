@@ -3,10 +3,10 @@ defaults:
   - ranker/encoder@query_encoder: transformer
 
 dataset: ???
-metrics: ???
+metrics: []
 
 device: cpu
-model_id: ???
+name: ???
 ckpt_file: ???
 index_dir: ???
 k: 1000
