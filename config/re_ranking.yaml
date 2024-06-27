@@ -7,8 +7,8 @@ name: ???
 index_dir: ???
 dataset: ???
 sparse_runfile: ???
-metrics: []
 
+metrics: []
 device: cpu
 
 cutoff_sparse: 1000

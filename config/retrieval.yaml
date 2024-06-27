@@ -6,8 +6,8 @@ ckpt_file: ???
 name: ???
 index_dir: ???
 dataset: ???
-metrics: []
 
+metrics: []
 device: cpu
 k: 1000
 batch_size: 32
