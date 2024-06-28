@@ -30,11 +30,11 @@ class IRDSCorpusEncodingDataset(EncodingDataset):
             max_len (int, optional): Split long documents into chunks (length in characters). Defaults to None.
         """
         super().__init__(data_processor, max_len)
-        self.dataset = ir_datasets.load(dataset)
+        self.dataset = dataset
         self.content_attributes = content_attributes
 
     def _get_data(self) -> Iterable[EncodingInstance]:
-        for doc in self.dataset.docs_iter():
+        for doc in ir_datasets.load(self.dataset).docs_iter():
             content = [getattr(doc, attr) for attr in self.content_attributes]
             yield doc.doc_id, ". ".join(content)
 
@@ -69,6 +69,8 @@ class IRDSPartialCorpusEncodingDataset(IRDSCorpusEncodingDataset):
         LOGGER.info("encoding %s documents", len(self.doc_ids))
 
     def _get_data(self) -> Iterable[EncodingInstance]:
-        for doc in self.dataset.docs_store().get_many_iter(self.doc_ids):
+        for doc in (
+            ir_datasets.load(self.dataset).docs_store().get_many_iter(self.doc_ids)
+        ):
             content = [getattr(doc, attr) for attr in self.content_attributes]
             yield doc.doc_id, ". ".join(content)

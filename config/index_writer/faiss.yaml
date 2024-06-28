@@ -1,1 +1,1 @@
-_target_: index.writer.FAISSIndexWriter
+_target_: util.index_writer.FAISSIndexWriter

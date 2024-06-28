@@ -6,7 +6,7 @@ from typing import Dict, Iterable, Iterator, Sequence, Tuple
 import faiss
 import numpy as np
 import torch
-from fast_forward.encoder import QueryEncoder as FFQueryEncoder
+from fast_forward.encoder import Encoder as FFEncoder
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 
@@ -47,7 +47,7 @@ def read_faiss_index(index_dir: Path) -> Tuple[faiss.Index, Dict[int, str]]:
     return index, orig_doc_ids
 
 
-class QueryEncoderAdapter(FFQueryEncoder):
+class QueryEncoderAdapter(FFEncoder):
     """Adapter class to use query encoder models for Fast-Forward indexes."""
 
     def __init__(
@@ -84,7 +84,7 @@ class QueryEncoderAdapter(FFQueryEncoder):
             self.projection = None
         self.encoder.eval()
 
-    def encode(self, queries: Sequence[str]) -> np.ndarray:
+    def __call__(self, queries: Sequence[str]) -> np.ndarray:
         self.encoder.eval()
         with torch.no_grad():
             rep = self.encoder(

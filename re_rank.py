@@ -8,8 +8,9 @@ from pathlib import Path
 import hydra
 import ir_datasets
 import ir_measures
+from fast_forward import Mode, OnDiskIndex
 from fast_forward.ranking import Ranking
-from hydra.utils import call
+from fast_forward.util import to_ir_measures
 from omegaconf import DictConfig
 
 from util import QueryEncoderAdapter
@@ -22,48 +23,51 @@ def main(config: DictConfig) -> None:
     LOGGER.info("loading %s", config.ckpt_file)
     adapter = QueryEncoderAdapter(config.query_encoder, config.ckpt_file, config.device)
 
-    LOGGER.info("loading index")
-    ff_index = call(config.ff_index_reader, query_encoder=adapter)
-
-    LOGGER.info("reading %s", config.sparse_scores_file)
-    sparse_scores = Ranking.from_file(Path(config.sparse_scores_file))
-    if config.cutoff_sparse is not None:
-        sparse_scores.cut(config.cutoff_sparse)
+    index_dir = Path(config.index_dir)
+    LOGGER.info("loading %s", index_dir)
+    ff_index = OnDiskIndex.load(index_dir / "ff_index.h5", adapter, Mode.MAXP)
 
     LOGGER.info("loading %s", config.dataset)
     dataset = ir_datasets.load(config.dataset)
-    queries = {query.query_id: query.text for query in dataset.queries_iter()}
+
+    LOGGER.info("reading %s", config.sparse_runfile)
+    sparse_ranking = Ranking.from_file(
+        Path(config.sparse_runfile),
+        {query.query_id: query.text for query in dataset.queries_iter()},
+    )
+    if config.cutoff_sparse is not None:
+        sparse_ranking.cut(config.cutoff_sparse)
 
     LOGGER.info("computing scores")
-    ff_result = ff_index.get_scores(
-        sparse_scores,
-        queries,
-        config.alpha,
-        config.cutoff,
-        config.early_stopping,
-    )
+    ff_out = ff_index(sparse_ranking)
 
-    measures = list(map(ir_measures.parse_measure, config.metrics))
-    with open(Path.cwd() / "metrics.csv", "w", encoding="utf-8", newline="") as fp:
-        writer = csv.DictWriter(
-            fp, ["type", "model_id", "dataset", "alpha", "cutoff"] + measures
-        )
-        writer.writeheader()
-        for alpha, ranking in ff_result.items():
-            ranking.name = f"{config.model_id}_{str(alpha)}"
-            target = Path(f"{ranking.name}.tsv")
-            LOGGER.info("writing %s", target)
-            ranking.save(target)
+    if len(config.metrics) > 0:
+        measures = list(map(ir_measures.parse_measure, config.metrics))
+        LOGGER.info("computing %s", measures)
 
-            row = ir_measures.calc_aggregate(
-                measures, dataset.qrels_iter(), ranking.run
+        results_file = Path.cwd() / f"ff_results_{config.name}.csv"
+        LOGGER.info("writing %s", results_file)
+        with open(results_file, "w", encoding="utf-8", newline="") as fp:
+            writer = csv.DictWriter(
+                fp, ["type", "name", "dataset", "alpha", "cutoff"] + measures
             )
-            row["type"] = "fast-forward"
-            row["model_id"] = config.model_id
-            row["dataset"] = config.dataset
-            row["alpha"] = alpha
-            row["cutoff"] = config.cutoff
-            writer.writerow(row)
+            writer.writeheader()
+
+            for alpha in config.alpha:
+                interpolated_ranking = ff_out.interpolate(sparse_ranking, alpha)
+                run_file = Path.cwd() / f"ff_results_{config.name}_{alpha}.tsv"
+                LOGGER.info("writing %s", run_file)
+                interpolated_ranking.save(run_file)
+
+                results = ir_measures.calc_aggregate(
+                    measures, dataset.qrels_iter(), to_ir_measures(interpolated_ranking)
+                )
+                results["type"] = "fast-forward"
+                results["name"] = config.name
+                results["dataset"] = config.dataset
+                results["alpha"] = alpha
+                results["cutoff"] = config.cutoff
+                writer.writerow(results)
 
 
 if __name__ == "__main__":

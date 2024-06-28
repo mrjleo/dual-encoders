@@ -2,7 +2,6 @@ import abc
 from typing import Any, Dict, Iterable, Sequence, Tuple, Union
 
 import torch
-import transformers
 from ranking_utils.model import Ranker, TrainingBatch, TrainingMode, ValTestBatch
 from ranking_utils.model.data import DataProcessor
 from transformers import get_constant_schedule_with_warmup
@@ -78,9 +77,6 @@ class DualEncoderDataProcessor(DataProcessor):
         self.query_tokenizer = query_tokenizer
         self.doc_tokenizer = doc_tokenizer or query_tokenizer
         self.char_limit = char_limit
-
-        # without this, there will be a message for each tokenizer call
-        transformers.logging.set_verbosity_error()
 
     def get_encoding_input(self, s: str) -> EncodingModelInput:
         """Sanitize an input string for encoding.
@@ -235,6 +231,7 @@ class DualEncoder(Ranker):
 
         Args:
             inputs (Union[ModelBatch, EncodingModelBatch]): Batch of corresponding inputs.
+            action (str, optional): Action to perform. Defaults to "score".
 
         Returns:
             torch.Tensor: Corresponding outputs.
@@ -270,38 +267,23 @@ class DualEncoder(Ranker):
         self.log("train_loss", loss)
         return loss
 
-    def validation_step(
-        self, batch: ValTestBatch, batch_idx: int
-    ) -> Dict[str, torch.Tensor]:
-        results = super().validation_step(batch, batch_idx)
+    def validation_step(self, batch: ValTestBatch, batch_idx: int) -> None:
+        super().validation_step(batch, batch_idx)
 
         if self.visualize_embeddings or self.compute_kl_div:
+            # use the same inputs (documents) for both encoders here
             (_, doc_inputs), _, _ = batch
-            results.update(
-                {
-                    "doc_reps_d_enc": self(doc_inputs, action="encode_docs"),
-                    "doc_reps_q_enc": self(doc_inputs, action="encode_queries"),
-                }
-            )
-        return results
+            emb_d_enc = self(doc_inputs, action="encode_docs")
+            emb_q_enc = self(doc_inputs, action="encode_queries")
 
-    def validation_step_end(self, step_results: Dict[str, torch.Tensor]) -> None:
-        super().validation_step_end(step_results)
-
-        if self.visualize_embeddings or self.compute_kl_div:
-            self.d_enc_embeddings.update(step_results["doc_reps_d_enc"])
-            self.q_enc_embeddings.update(step_results["doc_reps_q_enc"])
+            self.d_enc_embeddings.update(emb_d_enc)
+            self.q_enc_embeddings.update(emb_q_enc)
 
         if self.compute_kl_div:
-            self.kl_div.update(
-                step_results["doc_reps_d_enc"],
-                step_results["doc_reps_q_enc"],
-            )
+            self.kl_div.update(emb_d_enc, emb_q_enc)
 
-    def validation_epoch_end(
-        self, val_results: Iterable[Dict[str, torch.Tensor]]
-    ) -> None:
-        super().validation_epoch_end(val_results)
+    def on_validation_epoch_end(self) -> None:
+        super().on_validation_epoch_end()
 
         if self.visualize_embeddings or self.compute_kl_div:
             emb_d_enc = self.d_enc_embeddings.compute()

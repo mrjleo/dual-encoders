@@ -7,14 +7,13 @@ from torchmetrics import Metric
 class KLDivergence(Metric):
     """Multivariate KL divergence Metric."""
 
-    def __init__(self, emb_size: int, dist_sync_on_step: bool = False) -> None:
+    def __init__(self, emb_size: int) -> None:
         """Constructor.
 
         Args:
             emb_size (int): Embedding size.
-            dist_sync_on_step (bool, optional): Synchronize the attributes after every step. Defaults to False.
         """
-        super().__init__(dist_sync_on_step=dist_sync_on_step)
+        super().__init__(dist_sync_on_step=False)
         self.add_state(
             "p", default=torch.Tensor(size=[0, emb_size]), dist_reduce_fx=None
         )
@@ -41,16 +40,8 @@ class KLDivergence(Metric):
         Returns:
             float: The multivariate KL divergence.
         """
-        x = (
-            self.p.view(self.p.shape[0] * self.p.shape[1], self.p.shape[2])
-            .cpu()
-            .numpy()
-        )
-        y = (
-            self.q.view(self.q.shape[0] * self.q.shape[1], self.q.shape[2])
-            .cpu()
-            .numpy()
-        )
+        x = self.p.view(-1, self.p.shape[-1]).cpu().numpy()
+        y = self.q.view(-1, self.q.shape[-1]).cpu().numpy()
         n, d = x.shape
         m, dy = y.shape
         assert d == dy
@@ -63,17 +54,14 @@ class KLDivergence(Metric):
 class TensorStack(Metric):
     """Metric used for stacking and synchronizing embedding tensors."""
 
-    def __init__(
-        self, emb_size: int, max_size: int = None, dist_sync_on_step: bool = False
-    ) -> None:
+    def __init__(self, emb_size: int, max_size: int = None) -> None:
         """Constructor.
 
         Args:
             emb_size (int): Embedding size.
             max_size (int, optional): Maximum number of embeddings. Defaults to None.
-            dist_sync_on_step (bool, optional): Synchronize the attributes after every step. Defaults to False.
         """
-        super().__init__(dist_sync_on_step=dist_sync_on_step)
+        super().__init__(dist_sync_on_step=False)
         self.add_state(
             "t", default=torch.Tensor(size=[0, emb_size]), dist_reduce_fx=None
         )
@@ -95,6 +83,4 @@ class TensorStack(Metric):
         Returns:
             torch.Tensor: All embeddings stacked.
         """
-        return self.t.view(self.t.shape[0] * self.t.shape[1], self.t.shape[2])[
-            : self.max_size
-        ]
+        return self.t.view(-1, self.t.shape[-1])[: self.max_size]
