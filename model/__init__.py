@@ -2,7 +2,6 @@ import abc
 from typing import Any, Dict, Iterable, Sequence, Tuple, Union
 
 import torch
-import transformers
 from ranking_utils.model import Ranker, TrainingBatch, TrainingMode, ValTestBatch
 from ranking_utils.model.data import DataProcessor
 from transformers import get_constant_schedule_with_warmup
@@ -78,9 +77,6 @@ class DualEncoderDataProcessor(DataProcessor):
         self.query_tokenizer = query_tokenizer
         self.doc_tokenizer = doc_tokenizer or query_tokenizer
         self.char_limit = char_limit
-
-        # without this, there will be a message for each tokenizer call
-        transformers.logging.set_verbosity_error()
 
     def get_encoding_input(self, s: str) -> EncodingModelInput:
         """Sanitize an input string for encoding.
