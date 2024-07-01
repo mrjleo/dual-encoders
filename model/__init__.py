@@ -176,6 +176,7 @@ class DualEncoder(Ranker):
 
         self.visualize_embeddings = visualize_embeddings
         self.compute_kl_div = compute_kl_div
+
         self.kl_div = KLDivergence(self.embedding_dimension)
         self.q_enc_embeddings = TensorStack(self.embedding_dimension, num_embeddings)
         self.d_enc_embeddings = TensorStack(self.embedding_dimension, num_embeddings)
@@ -276,6 +277,7 @@ class DualEncoder(Ranker):
             emb_d_enc = self(doc_inputs, action="encode_docs")
             emb_q_enc = self(doc_inputs, action="encode_queries")
 
+        if self.visualize_embeddings:
             self.d_enc_embeddings.update(emb_d_enc)
             self.q_enc_embeddings.update(emb_q_enc)
 
@@ -285,11 +287,9 @@ class DualEncoder(Ranker):
     def on_validation_epoch_end(self) -> None:
         super().on_validation_epoch_end()
 
-        if self.visualize_embeddings or self.compute_kl_div:
+        if self.visualize_embeddings:
             emb_d_enc = self.d_enc_embeddings.compute()
             emb_q_enc = self.q_enc_embeddings.compute()
-
-        if self.visualize_embeddings:
             self.logger.experiment.add_embedding(
                 torch.vstack((emb_d_enc, emb_q_enc)),
                 metadata=["d_enc"] * emb_d_enc.shape[0]
