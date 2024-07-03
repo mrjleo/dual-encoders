@@ -48,9 +48,7 @@ def main(config: DictConfig) -> None:
         results_file = Path.cwd() / f"ff_results_{config.name}.csv"
         LOGGER.info("writing %s", results_file)
         with open(results_file, "w", encoding="utf-8", newline="") as fp:
-            writer = csv.DictWriter(
-                fp, ["type", "name", "dataset", "alpha", "cutoff"] + measures
-            )
+            writer = csv.DictWriter(fp, ["type", "name", "dataset", "alpha"] + measures)
             writer.writeheader()
 
             for alpha in config.alpha:
@@ -66,7 +64,6 @@ def main(config: DictConfig) -> None:
                 results["name"] = config.name
                 results["dataset"] = config.dataset
                 results["alpha"] = alpha
-                results["cutoff"] = config.cutoff
                 writer.writerow(results)
 
 
