@@ -20,8 +20,8 @@ LOGGER = logging.getLogger(__name__)
 
 @hydra.main(config_path="config", config_name="re_ranking", version_base="1.3")
 def main(config: DictConfig) -> None:
-    LOGGER.info("loading %s", config.ckpt_file)
-    adapter = QueryEncoderAdapter(config.query_encoder, config.ckpt_file, config.device)
+    LOGGER.info("loading %s", config.ckpt_path)
+    adapter = QueryEncoderAdapter(config.query_encoder, config.ckpt_path, config.device)
 
     index_dir = Path(config.index_dir)
     LOGGER.info("loading %s", index_dir)

@@ -2,7 +2,7 @@ defaults:
   - _self_
   - ranker/encoder@query_encoder: transformer
 
-ckpt_file: ???
+ckpt_path: ???
 name: ???
 index_dir: ???
 dataset: ???
