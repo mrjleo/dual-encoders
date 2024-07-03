@@ -299,11 +299,7 @@ class DualEncoder(Ranker):
             )
 
         if self.compute_kl_div:
-            self.log(
-                f"val_{self.kl_div.__class__.__name__}",
-                self.kl_div.compute(),
-                sync_dist=True,
-            )
+            self.log(f"val_{self.kl_div.__class__.__name__}", self.kl_div.compute())
 
         self.d_enc_embeddings.reset()
         self.q_enc_embeddings.reset()
