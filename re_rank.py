@@ -13,7 +13,7 @@ from fast_forward.ranking import Ranking
 from fast_forward.util import to_ir_measures
 from omegaconf import DictConfig
 
-from util import QueryEncoderAdapter
+from util import StandaloneEncoder
 
 LOGGER = logging.getLogger(__name__)
 
@@ -21,11 +21,13 @@ LOGGER = logging.getLogger(__name__)
 @hydra.main(config_path="config", config_name="re_ranking", version_base="1.3")
 def main(config: DictConfig) -> None:
     LOGGER.info("loading %s", config.ckpt_path)
-    adapter = QueryEncoderAdapter(config.query_encoder, config.ckpt_path, config.device)
+    query_encoder = StandaloneEncoder(
+        config.query_encoder, config.ckpt_path, "query_encoder", config.device
+    )
 
     index_dir = Path(config.index_dir)
     LOGGER.info("loading %s", index_dir)
-    ff_index = OnDiskIndex.load(index_dir / "ff_index.h5", adapter, Mode.MAXP)
+    ff_index = OnDiskIndex.load(index_dir / "ff_index.h5", query_encoder, Mode.MAXP)
 
     LOGGER.info("loading %s", config.dataset)
     dataset = ir_datasets.load(config.dataset)

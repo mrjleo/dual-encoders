@@ -13,7 +13,7 @@ from omegaconf import DictConfig
 from ranking_utils import write_trec_eval_file
 from tqdm import tqdm
 
-from util import QueryEncoderAdapter, batch_iter, read_faiss_index
+from util import StandaloneEncoder, batch_iter, read_faiss_index
 
 LOGGER = logging.getLogger(__name__)
 
@@ -21,7 +21,9 @@ LOGGER = logging.getLogger(__name__)
 @hydra.main(config_path="config", config_name="retrieval", version_base="1.3")
 def main(config: DictConfig) -> None:
     LOGGER.info("loading %s", config.ckpt_path)
-    encoder = QueryEncoderAdapter(config.query_encoder, config.ckpt_path, config.device)
+    query_encoder = StandaloneEncoder(
+        config.query_encoder, config.ckpt_path, "query_encoder", config.device
+    )
 
     index_dir = Path(config.index_dir)
     LOGGER.info("loading %s", index_dir)
@@ -33,7 +35,7 @@ def main(config: DictConfig) -> None:
     run = defaultdict(lambda: defaultdict(lambda: float("-inf")))
     for batch in tqdm(batch_iter(dataset.queries_iter(), config.batch_size)):
         ids, queries = zip(*batch)
-        out = encoder(queries)
+        out = query_encoder(queries)
         D, I = index.search(out, config.k)
         for q_id, doc_ids, scores in zip(ids, I, D):
             for doc_id, score in zip(doc_ids, scores):

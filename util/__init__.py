@@ -47,17 +47,22 @@ def read_faiss_index(index_dir: Path) -> Tuple[faiss.Index, Dict[int, str]]:
     return index, orig_doc_ids
 
 
-class QueryEncoderAdapter(FFEncoder):
-    """Adapter class to use query encoder models for Fast-Forward indexes."""
+class StandaloneEncoder(FFEncoder):
+    """Adapter class to use encoders for indexing, retrieval, or re-ranking."""
 
     def __init__(
-        self, encoder_config: DictConfig, ckpt_file: Path, device: str = "cpu"
+        self,
+        encoder_config: DictConfig,
+        ckpt_file: Path,
+        weights_prefix: str = "query_encoder",
+        device: str = "cpu",
     ) -> None:
         """Constructor.
 
         Args:
             encoder_config (DictConfig): Encoder config.
             ckpt_file (Path): Checkpoint to load.
+            weights_prefix (str, optional): Prefix of the keys to be loaded in the state dict of the checkpoint. Defaults to "query_encoder".
             device (str, optional): Device to use. Defaults to "cpu".
         """
         super().__init__()
@@ -69,8 +74,8 @@ class QueryEncoderAdapter(FFEncoder):
         sd_enc, sd_proj = {}, {}
         ckpt = torch.load(ckpt_file, map_location=device)
         for k, v in ckpt["state_dict"].items():
-            if k.startswith("query_encoder"):
-                sd_enc[k[14:]] = v
+            if k.startswith(weights_prefix):
+                sd_enc[k[len(weights_prefix) :]] = v
             if k.startswith("projection"):
                 sd_proj[k[11:]] = v
         self.encoder.load_state_dict(sd_enc)
