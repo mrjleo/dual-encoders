@@ -2,7 +2,7 @@ defaults:
   - _self_
   - ranker: dual_encoder
   - training_data: h5
-  - trainer: fine_tune
+  - trainer: fine_tuning
 
 random_seed: 123
 ckpt_path: null

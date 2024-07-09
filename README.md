@@ -45,7 +45,7 @@ python train.py \
     training_data.fold_name=fold_0
 ```
 
-The default configuration for training can be found in `config/trainer/fine_tune.yaml`. All defaults can be overriden via the command line.
+The default configuration for training can be found in `config/trainer/fine_tuning.yaml`. All defaults can be overriden via the command line.
 
 You can further override or add new arguments to other components such as the [`pytorch_lightning.Trainer`](https://lightning.ai/docs/pytorch/stable/common/trainer.html#trainer-flags). Some examples are:
 
@@ -60,7 +60,7 @@ Model (hyper)parameters can be overidden like any other argument. They are prefi
 
 #### Validation
 
-Validation using ranking metrics is enabled by default (see [ranking-utils](https://github.com/mrjleo/ranking-utils?tab=readme-ov-file#validation) for more information). This can be configured using the Trainer options (see `config/trainer/fine_tune.yaml`).
+Validation using ranking metrics is enabled by default (see [ranking-utils](https://github.com/mrjleo/ranking-utils?tab=readme-ov-file#validation) for more information). This can be configured using the Trainer options (see `config/trainer/fine_tuning.yaml`).
 
 ### Indexing
 
