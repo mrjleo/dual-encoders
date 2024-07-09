@@ -99,4 +99,4 @@ python index.py \
     index_writer=faiss
 ```
 
-**Important**: The model (`ranker`) configuration (i.e., hyperparameters) needs to match the training stage, otherwise the checkpoint cannot be loaded.
+**Important**: The encoder (`doc_encoder`) configuration (i.e., hyperparameters) must match the training stage, otherwise the checkpoint cannot be loaded.

@@ -13,7 +13,7 @@ EncodingBatch = Tuple[List[str], EncodingModelBatch]
 
 
 class EncodingDataset(IterableDataset, abc.ABC):
-    """PyTorch dataset for encoding using dual-encoder models."""
+    """PyTorch dataset for document encoding."""
 
     def __init__(self, data_processor: DataProcessor, max_len: int = None) -> None:
         """Constructor.
@@ -81,5 +81,5 @@ class EncodingDataset(IterableDataset, abc.ABC):
         ids, inputs = zip(*inputs)
         return (
             list(ids),
-            self.data_processor.get_encoding_batch(inputs),
+            self.data_processor.get_encoding_batch(inputs, is_doc=True),
         )

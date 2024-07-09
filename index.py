@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 
+import logging
 from queue import Queue
 from threading import Thread
 
@@ -10,18 +11,26 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from tqdm import tqdm
 
+from util import StandaloneEncoder
+
+LOGGER = logging.getLogger(__name__)
+
 
 @hydra.main(config_path="config", config_name="indexing", version_base="1.3")
 def main(config: DictConfig) -> None:
-    ranker = instantiate(config.ranker.model)
-    ranker.load_state_dict(
-        torch.load(config.ckpt_path, map_location=config.device)["state_dict"]
+    LOGGER.info("loading %s", config.ckpt_path)
+    doc_encoder = StandaloneEncoder(
+        config.doc_encoder, config.ckpt_path, "doc_encoder", config.device
     )
-    ranker = torch.nn.DataParallel(ranker)
-    ranker.to(config.device)
-    ranker.eval()
+
+    # during indexing, the query tokenizer never gets called, so we can use None here
     dataset = instantiate(
-        config.encoding_data, data_processor=instantiate(config.ranker.data_processor)
+        config.encoding_data,
+        data_processor=instantiate(
+            config.data_processor,
+            query_tokenizer=None,
+            doc_tokenizer=doc_encoder.tokenizer,
+        ),
     )
     data_loader = instantiate(
         config.data_loader, dataset=dataset, collate_fn=dataset.collate_fn
@@ -36,9 +45,10 @@ def main(config: DictConfig) -> None:
     t_index.start()
 
     for ids, d_inputs in tqdm(data_loader):
-        d_inputs = {k: v.to(config.device) for k, v in d_inputs.items()}
         with torch.no_grad():
-            out = ranker(d_inputs, action="encode_docs")
+            out = doc_encoder.encoder(
+                {k: v.to(config.device) for k, v in d_inputs.items()}
+            )
         q.put((ids, out.detach().cpu().numpy()))
 
     # sentinel
