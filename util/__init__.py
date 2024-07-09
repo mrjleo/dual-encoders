@@ -74,10 +74,13 @@ class StandaloneEncoder(FFEncoder):
         sd_enc, sd_proj = {}, {}
         ckpt = torch.load(ckpt_file, map_location=device)
         for k, v in ckpt["state_dict"].items():
+
+            # remove prefix and dot
             if k.startswith(weights_prefix):
-                sd_enc[k[len(weights_prefix) :]] = v
+                sd_enc[k[len(weights_prefix) + 1 :]] = v
             if k.startswith("projection"):
                 sd_proj[k[11:]] = v
+
         self.encoder.load_state_dict(sd_enc)
         if ckpt["hyper_parameters"].get("projection_size") is not None:
             self.projection = torch.nn.Linear(
