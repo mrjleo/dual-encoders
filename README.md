@@ -3,7 +3,7 @@
 This repository implements dual-encoder models for information retrieval. Specifically, the following is supported:
 
 - Training of Transformer-based symmetric or asymmetric dual-encoders
-- Indexing corpora from ir-datasets
+- Indexing corpora from [`ir_datasets`](https://ir-datasets.com/)
 - Re-ranking using [Fast-Forward indexes](https://github.com/mrjleo/fast-forward-indexes)
 - Dense retrieval using [FAISS](https://github.com/facebookresearch/faiss)
 
@@ -14,6 +14,8 @@ Install the packages from `requirements.txt`. Note that [ranking_utils](https://
 ## Usage
 
 We use [Hydra](https://hydra.cc/) for the configuration of all scripts, such as models, hyperparameters, paths and so on. Please refer to the documentation for instructions how to use Hydra.
+
+The default behavior of Hydra is to create a new directory, `outputs`, in the current working directory. In order to use a custom output directory, override the `hydra.run.dir` argument.
 
 Currently, the following encoder models are available along with the corresponding configuration files:
 
@@ -60,6 +62,41 @@ Model (hyper)parameters can be overidden like any other argument. They are prefi
 
 Validation using ranking metrics is enabled by default (see [ranking-utils](https://github.com/mrjleo/ranking-utils?tab=readme-ov-file#validation) for more information). This can be configured using the Trainer options (see `config/trainer/fine_tune.yaml`).
 
-#### Output Files
+### Indexing
 
-The default behavior of Hydra is to create a new directory, `outputs`, in the current working directory. In order to use a custom output directory, override the `hydra.run.dir` argument.
+Indexing is handled by the `index.py` script, and the corresponding configuration file can be found at `config/indexing.yaml`. Most importantly, the type of index to be created can be controlled using `index_writer`:
+
+- `index_writer=fast_forward` creates a [Fast-Forward OnDiskIndex](https://mrjleo.github.io/fast-forward-indexes/docs/v0.2.0/fast_forward/index/disk.html#OnDiskIndex)
+- `index_writer=fast_forward` creates a [FAISS IndexFlatIP](https://github.com/facebookresearch/faiss/wiki/Faiss-indexes)
+
+Furthermore, the document collection to be indexed is determined using `encoding_data` and the corresponding configuations:
+
+- `encoding_data=h5_corpus` indexes the corpus from a [pre-processed dataset](#pre-processing) (`config/encoding_data/h5_corpus.yaml`)
+- `encoding_data=irds_corpus` indexes a corpus from [`ir_datasets`](https://ir-datasets.com/) (`config/encoding_data/irds_corpus.yaml`)
+
+#### Examples
+
+Creating a Fast-Forward index from a pre-processed dataset corpus:
+
+```
+python index.py \
+    encoding_data=h5_corpus \
+    encoding_data.data_dir=/path/to/preprocessed/files \
+    ckpt_path=/path/to/model/checkpoint.ckpt \
+    data_loader.batch_size=512 \
+    index_writer=fast_forward
+```
+
+Creating a FAISS index from an [`ir_datasets` corpus](https://ir-datasets.com/beir.html#beir/fever), indexing both `title` and `text` attributes of each document:
+
+```
+python index.py \
+    encoding_data=irds_corpus \
+    encoding_data.dataset=beir/fever \
+    encoding_data.content_attributes="[title, text]" \
+    ckpt_path=/path/to/model/checkpoint.ckpt \
+    data_loader.batch_size=512 \
+    index_writer=faiss
+```
+
+**Important**: The model (`ranker`) configuration (i.e., hyperparameters) needs to match the training stage, otherwise the checkpoint cannot be loaded.
