@@ -99,4 +99,35 @@ python index.py \
     index_writer=faiss
 ```
 
-**Important**: The encoder (`doc_encoder`) configuration (i.e., hyperparameters) must match the training stage, otherwise the checkpoint cannot be loaded.
+**Important**: The document encoder (`doc_encoder`) configuration (i.e., hyperparameters) must match the training stage, otherwise the checkpoint cannot be loaded.
+
+### Re-Ranking and Dense Retrieval
+
+The `re_rank.py` script performs interpolation-based re-ranking using the [Fast-Forward indexes](https://github.com/mrjleo/fast-forward-indexes) pipeline. The configuration can be found in `config/indexing.yaml`. This requries an existing Fast-Forward index (see [indexing](#indexing)) and a corresponding first-stage (sparse retrieval) run to be re-ranked. For example:
+
+```
+python re_rank.py \
+    ckpt_path=/path/to/model/checkpoint.ckpt \
+    dataset=msmarco-passage/trec-dl-2019/judged \
+    index_dir=/path/to/fast_forward/index \
+    name=my-model \
+    metrics="[nDCG@10]" \
+    alpha="[0.7]" \
+    sparse_runfile=/path/to/trec/run.tsv \
+    cutoff_sparse=5000
+```
+
+Here, the queries (and QRels) are taken from [`ir_datasets`](https://ir-datasets.com/msmarco-passage.html#msmarco-passage/trec-dl-2019/judged). If any metrics are provided using the `metrics` config option, they are parsed and computed using [`ir-measures`](https://ir-measur.es/). The sparse runfile (`sparse_runfile`) must be in standard TREC format.
+
+Alternatively, the trained models can be used for dense retrieval using the `retrieve.py` script (configured using `config/retrieval.yaml`). This requries a FAISS index (see [indexing](#indexing)). For example:
+
+```
+python retrieve.py \
+    ckpt_path=/path/to/model/checkpoint.ckpt \
+    dataset=msmarco-passage/trec-dl-2019/judged \
+    index_dir=/path/to/faiss/index \
+    name=my-model \
+    metrics=[nDCG@10]
+```
+
+**Important**: The query encoder (`query_encoder`) configuration (i.e., hyperparameters) must match the training stage, otherwise the checkpoint cannot be loaded.
