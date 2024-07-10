@@ -26,6 +26,9 @@ class H5CorpusEncodingDataset(EncodingDataset):
         super().__init__(data_processor, max_len)
         self.data_file = Path(data_dir) / "data.h5"
 
+    def _is_doc(self) -> bool:
+        return True
+
     def _get_data(self) -> Iterable[EncodingInstance]:
         with h5py.File(self.data_file, "r") as fp:
             yield from zip(fp["orig_doc_ids"].asstr(), fp["docs"].asstr())

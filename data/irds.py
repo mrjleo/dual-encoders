@@ -33,6 +33,9 @@ class IRDSCorpusEncodingDataset(EncodingDataset):
         self.dataset = dataset
         self.content_attributes = content_attributes
 
+    def _is_doc(self) -> bool:
+        return True
+
     def _get_data(self) -> Iterable[EncodingInstance]:
         for doc in ir_datasets.load(self.dataset).docs_iter():
             content = [getattr(doc, attr) for attr in self.content_attributes]

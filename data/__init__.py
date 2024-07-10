@@ -13,22 +13,31 @@ EncodingBatch = Tuple[List[str], EncodingModelBatch]
 
 
 class EncodingDataset(IterableDataset, abc.ABC):
-    """PyTorch dataset for document encoding."""
+    """PyTorch dataset for encoding documents or queries."""
 
     def __init__(self, data_processor: DataProcessor, max_len: int = None) -> None:
         """Constructor.
 
         Args:
             data_processor (DataProcessor): A model-specific data processor.
-            max_len (int, optional): Split long documents into chunks (length in characters). Defaults to None.
+            max_len (int, optional): Split long texts into chunks (length in characters). Defaults to None.
         """
         super().__init__()
         self.data_processor = data_processor
         self.max_len = max_len
 
     @abc.abstractmethod
+    def _is_doc(self) -> bool:
+        """Determines whether the document or query encoder should be used.
+
+        Returns:
+            bool: Whether to use the document encoder (`True`) or query encoder (`False`).
+        """
+        pass
+
+    @abc.abstractmethod
     def _get_data(self) -> Iterable[EncodingInstance]:
-        """An iterator over all encoding instances (e.g. the whole corpus).
+        """An iterator over all encoding instances.
 
         Yields:
             EncodingInstance: An item to be encoded.
@@ -81,5 +90,5 @@ class EncodingDataset(IterableDataset, abc.ABC):
         ids, inputs = zip(*inputs)
         return (
             list(ids),
-            self.data_processor.get_encoding_batch(inputs, is_doc=True),
+            self.data_processor.get_encoding_batch(inputs, is_doc=self._is_doc()),
         )
