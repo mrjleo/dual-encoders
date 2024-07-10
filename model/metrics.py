@@ -8,7 +8,7 @@ class KLDivergence(Metric):
     """Multivariate KL divergence Metric."""
 
     def __init__(self, emb_size: int) -> None:
-        """Constructor.
+        """Instantiate a multivariate KL divergence metric.
 
         Args:
             emb_size (int): Embedding size.
@@ -55,7 +55,7 @@ class TensorStack(Metric):
     """Metric used for stacking and synchronizing embedding tensors."""
 
     def __init__(self, emb_size: int, max_size: int = None) -> None:
-        """Constructor.
+        """Instantiate a tensor stack.
 
         Args:
             emb_size (int): Embedding size.

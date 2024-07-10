@@ -66,7 +66,8 @@ class DualEncoderDataProcessor(DataProcessor):
         doc_tokenizer: Tokenizer = None,
         char_limit: int = None,
     ) -> None:
-        """Constructor. If "doc_tokenizer" is None, "query_tokenizer" will be used for documents.
+        """Instantiate a data processor for dual-encoder rankers.
+        If `doc_tokenizer` is `None`, `query_tokenizer` will be used for documents.
 
         Args:
             query_tokenizer (Tokenizer): Tokenizer used for queries.
@@ -134,7 +135,8 @@ class DualEncoder(Ranker):
         compute_kl_div: bool = False,
         num_embeddings: int = None,
     ):
-        """Constructor. If "doc_encoder" is None, "query_encoder" will be used for documents.
+        """Instantiate a dual-encoder ranker.
+        If `doc_encoder` is `None`, `query_encoder` will be used for documents.
 
         Args:
             lr (float): Learning rate.
@@ -226,9 +228,9 @@ class DualEncoder(Ranker):
         action: str = "score",
     ) -> torch.Tensor:
         """Perform one of three actions:
-            * "score": Compute query-document scores.
-            * "encode_queries": Compute query representations.
-            * "encode_docs": Compute document representations.
+            * `"score"`: Compute query-document scores.
+            * `"encode_queries"`: Compute query representations.
+            * `"encode_docs"`: Compute document representations.
 
         Args:
             inputs (Union[ModelBatch, EncodingModelBatch]): Batch of corresponding inputs.

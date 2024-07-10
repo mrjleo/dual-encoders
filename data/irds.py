@@ -21,7 +21,7 @@ class IRDSCorpusEncodingDataset(EncodingDataset):
         content_attributes: Iterable[str],
         max_len: int = None,
     ) -> None:
-        """Constructor.
+        """Instantiate an encoding dataset for IRDS corpora.
 
         Args:
             data_processor (DataProcessor): A model-specific data processor.
@@ -55,7 +55,7 @@ class IRDSPartialCorpusEncodingDataset(IRDSCorpusEncodingDataset):
         content_attributes: Iterable[str],
         max_len: int = None,
     ) -> None:
-        """Constructor.
+        """Instantiate an encoding dataset for partial IRDS corpora.
 
         Args:
             data_processor (DataProcessor): A model-specific data processor.

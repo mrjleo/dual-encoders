@@ -16,7 +16,7 @@ class EncodingDataset(IterableDataset, abc.ABC):
     """PyTorch dataset for encoding documents or queries."""
 
     def __init__(self, data_processor: DataProcessor, max_len: int = None) -> None:
-        """Constructor.
+        """Instantiate an encoding dataset.
 
         Args:
             data_processor (DataProcessor): A model-specific data processor.
@@ -45,7 +45,7 @@ class EncodingDataset(IterableDataset, abc.ABC):
         pass
 
     def _split(self, item: str) -> Iterable[str]:
-        """Split an item into chunks if "max_len" was set.
+        """Split an item into chunks if `max_len` was set.
 
         Args:
             item (str): The input item.

@@ -13,7 +13,7 @@ LOGGER = logging.getLogger(__name__)
 
 class SelectiveTransformerEncoder(Encoder):
     """Encodes a string using the CLS token of Transformer models.
-    Only a percentage of the input tokens are kept, controlled by "delta".
+    Only a percentage of the input tokens are kept, controlled by `delta`.
     The lowest-scoring tokens are dropped.
     """
 
@@ -23,7 +23,7 @@ class SelectiveTransformerEncoder(Encoder):
         delta: float = 0.75,
         selector_weights: Union[Path, str] = None,
     ):
-        """Constructor.
+        """Instantiate a selective Transformer encoder.
 
         Args:
             pretrained_model (str): Pre-trained model on the HuggingFace Hub.
@@ -67,7 +67,7 @@ class SelectiveTransformerEncoder(Encoder):
         token_type_ids: torch.Tensor,
         scores: torch.Tensor,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-        """Take a batch and its scores as input. Reduces the batch length to (delta * orig_len).
+        """Take a batch and its scores as input. Reduces the batch length to `delta * orig_len`.
 
         Args:
             inputs_embeds (torch.Tensor): Input token embeddings.

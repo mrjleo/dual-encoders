@@ -44,7 +44,7 @@ class TransformerEncoder(Encoder):
     """Encodes a string using the CLS token of Transformer models."""
 
     def __init__(self, pretrained_model: str, dense_layer_dim: int = None) -> None:
-        """Constuctor.
+        """Instantiate a Transformer encoder.
 
         Args:
             pretrained_model (str): Pre-trained model on the HuggingFace Hub.

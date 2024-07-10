@@ -16,7 +16,7 @@ class H5CorpusEncodingDataset(EncodingDataset):
         data_dir: Union[Path, str],
         max_len: int = None,
     ) -> None:
-        """Constructor.
+        """Instantiate an H5 corpus encoding dataset.
 
         Args:
             data_processor (DataProcessor): A model-specific data processor.

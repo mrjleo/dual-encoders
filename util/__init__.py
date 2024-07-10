@@ -48,7 +48,9 @@ def read_faiss_index(index_dir: Path) -> Tuple[faiss.Index, Dict[int, str]]:
 
 
 class StandaloneEncoder(FFEncoder):
-    """Adapter class to use encoders for indexing, retrieval, or re-ranking."""
+    """Adapter class to use encoders for indexing, retrieval, or re-ranking.
+    Can be used as an encoder for Fast-Forward indexes.
+    """
 
     def __init__(
         self,
@@ -57,7 +59,7 @@ class StandaloneEncoder(FFEncoder):
         weights_prefix: str = "query_encoder",
         device: str = "cpu",
     ) -> None:
-        """Constructor.
+        """Instantiate a standalone encoder.
 
         Args:
             encoder_config (DictConfig): Encoder config.
