@@ -7,9 +7,20 @@ This repository implements dual-encoder models for information retrieval. Specif
 - Re-ranking using [Fast-Forward indexes](https://github.com/mrjleo/fast-forward-indexes)
 - Dense retrieval using [FAISS](https://github.com/facebookresearch/faiss)
 
-## Requirements
+## Installation
 
-Install the packages from `requirements.txt`. Note that [ranking_utils](https://github.com/mrjleo/ranking-utils) has additional dependencies.
+First clone this repository locally and cd into it:
+```
+git clone git@github.com:BovdBerg/dual-encoders.git
+cd dual-encoders/
+```
+
+Then create a new conda environment with python 3.8 and install the packages from `requirements.txt` (Note that [ranking_utils](https://github.com/mrjleo/ranking-utils) has additional dependencies):
+```
+conda create -y -n dual-encoders python==3.9 pip
+conda activate dual-encoders
+pip install --user -r requirements.txt
+```
 
 ## Usage
 
