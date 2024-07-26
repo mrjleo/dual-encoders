@@ -67,6 +67,8 @@ def main(config: DictConfig) -> None:
                 results["dataset"] = config.dataset
                 results["alpha"] = alpha
                 writer.writerow(results)
+                LOGGER.info("headers were:\n%s", writer.fieldnames)
+                LOGGER.info("results for alpha %f:\n%s", alpha, results)
 
 
 if __name__ == "__main__":
