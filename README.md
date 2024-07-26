@@ -112,8 +112,18 @@ python index.py \
 
 **Important**: The document encoder (`doc_encoder`) configuration (i.e., hyperparameters) must match the training stage, otherwise the checkpoint cannot be loaded.
 
-### Re-Ranking and Dense Retrieval
+### Retrieve-and-rerank
 
+#### First-Stage (Sparse) Retrieval
+Create a sparse run where you retrieve the top-k ranked docs for each query in the testset. 
+The configuration can be found in `config/sparse_retrieval.yaml`. Note that each of these parameters can be overwritten.
+
+Run the sparse retrieval as follows:
+```
+python /path/to/retrieve_sparse.py
+```
+
+#### Re-Ranking
 The `re_rank.py` script performs interpolation-based re-ranking using the [Fast-Forward indexes](https://github.com/mrjleo/fast-forward-indexes) pipeline. The configuration can be found in `config/indexing.yaml`. This requries an existing Fast-Forward index (see [indexing](#indexing)) and a corresponding first-stage (sparse retrieval) run to be re-ranked. For example:
 
 ```
@@ -130,7 +140,9 @@ python re_rank.py \
 
 Here, the queries (and QRels) are taken from [`ir_datasets`](https://ir-datasets.com/msmarco-passage.html#msmarco-passage/trec-dl-2019/judged). If any metrics are provided using the `metrics` config option, they are parsed and computed using [`ir-measures`](https://ir-measur.es/). The sparse runfile (`sparse_runfile`) must be in standard TREC format.
 
-Alternatively, the trained models can be used for dense retrieval using the `retrieve.py` script (configured using `config/retrieval.yaml`). This requries a FAISS index (see [indexing](#indexing)). For example:
+### Dense Retrieval
+
+Alternatively to Re-ranking above, the trained models can be used for dense retrieval using the `retrieve.py` script (configured using `config/retrieval.yaml`). This requries a FAISS index (see [indexing](#indexing)). For example:
 
 ```
 python retrieve.py \

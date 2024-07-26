@@ -1,0 +1,22 @@
+defaults:
+  - _self_
+
+# Used to retrieve a model from http://data.terrier.org/
+# E.g. ```bm25_terrier_stemmed = pt.BatchRetrieve.from_dataset('msmarco_passage', 'terrier_stemmed', wmodel='BM25')``` 
+#      from http://data.terrier.org/msmarco_passage.dataset.html
+model:
+  index: msmarco_passage
+  variant: terrier_stemmed
+  wmodel: BM25
+
+k: 10000 # Retrieval depth: nr of docs to retrieve per query
+
+# Used to retrieve topics from https://pyterrier.readthedocs.io/en/latest/datasets.html
+# E.g. ```topics = pt.get_dataset("msmarco_passage").get_topics("test-2019")```
+dataset: msmarco_passage
+topics: test-2019
+
+hydra:
+  job:
+    chdir: True
+# Overwrite hydra.run.dir if you want the output to be saved in a different directory

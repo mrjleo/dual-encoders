@@ -13,3 +13,4 @@ h5py==3.11.0
 tensorboardx==2.2
 numpy==1.26.0
 fsspec==2023.12.2
+python-terrier==0.10.1
