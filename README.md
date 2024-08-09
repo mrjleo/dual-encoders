@@ -38,7 +38,7 @@ For example, in order to train a symmetric dual-encoder, run the following:
 ```
 python train.py \
     ranker/encoder@ranker.query_encoder=transformer \
-    ranker.doc_encoder.pretrained_model=bert-base-uncased \
+    ranker.query_encoder.pretrained_model=bert-base-uncased \
     ranker/encoder@ranker.doc_encoder=transformer \
     ranker.doc_encoder.pretrained_model=bert-base-uncased \
     training_data.data_dir=/path/to/preprocessed/files \
@@ -127,7 +127,7 @@ python retrieve.py \
     dataset=msmarco-passage/trec-dl-2019/judged \
     index_dir=/path/to/faiss/index \
     name=my-model \
-    metrics=[nDCG@10]
+    metrics="[nDCG@10]"
 ```
 
 **Important**: The query encoder (`query_encoder`) configuration (i.e., hyperparameters) must match the training stage, otherwise the checkpoint cannot be loaded.
