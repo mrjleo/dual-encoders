@@ -90,6 +90,7 @@ class StandaloneEncoder(FFEncoder):
                 ckpt["hyper_parameters"]["projection_size"],
             )
             self.projection.load_state_dict(sd_proj)
+            self.projection.eval()
         else:
             self.projection = None
         self.encoder.eval()
