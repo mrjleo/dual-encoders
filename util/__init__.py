@@ -83,7 +83,7 @@ class StandaloneEncoder(FFEncoder):
             if k.startswith("projection"):
                 sd_proj[k[11:]] = v
 
-        self.encoder.load_state_dict(sd_enc)
+        self.encoder.load_state_dict(sd_enc, strict=False)
         if ckpt["hyper_parameters"].get("projection_size") is not None:
             self.projection = torch.nn.Linear(
                 self.encoder.embedding_dimension,
