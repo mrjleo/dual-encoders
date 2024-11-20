@@ -86,6 +86,11 @@ class FastForwardIndexWriter(IndexWriter):
     index: OnDiskIndex = None
 
     def __call__(self, q: Queue) -> None:
+        if self.index is None:
+            ff_index_file = self.target_dir / "ff_index.h5"
+            LOGGER.info("creating %s", ff_index_file)
+            self.index = OnDiskIndex(ff_index_file)
+
         while True:
             item = q.get()
 
@@ -94,12 +99,6 @@ class FastForwardIndexWriter(IndexWriter):
                 break
 
             ids, out = item
-
-            if self.index is None:
-                ff_index_file = self.target_dir / "ff_index.h5"
-                LOGGER.info("creating %s", ff_index_file)
-                self.index = OnDiskIndex(ff_index_file, out.shape[-1])
-
             self.index.add(out, doc_ids=ids)
 
     def finalize_index(self) -> None:
