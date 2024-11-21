@@ -8,6 +8,7 @@ index_dir: ???
 dataset: ???
 sparse_runfile: ???
 
+query_attribute: text
 metrics: []
 device: cpu
 

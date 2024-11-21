@@ -35,7 +35,10 @@ def main(config: DictConfig) -> None:
     LOGGER.info("reading %s", config.sparse_runfile)
     sparse_ranking = Ranking.from_file(
         Path(config.sparse_runfile),
-        {query.query_id: query.text for query in dataset.queries_iter()},
+        {
+            query.query_id: getattr(query, config.query_attribute)
+            for query in dataset.queries_iter()
+        },
     )
     if config.cutoff_sparse is not None:
         sparse_ranking.cut(config.cutoff_sparse)

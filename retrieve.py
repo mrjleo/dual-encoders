@@ -34,10 +34,11 @@ def main(config: DictConfig) -> None:
 
     run = defaultdict(lambda: defaultdict(lambda: float("-inf")))
     for batch in tqdm(batch_iter(dataset.queries_iter(), config.batch_size)):
-        ids, queries = zip(*batch)
+        q_ids = [q.query_id for q in batch]
+        queries = [getattr(q, config.query_attribute) for q in batch]
         out = query_encoder(queries)
         D, I = index.search(out, config.k)
-        for q_id, doc_ids, scores in zip(ids, I, D):
+        for q_id, doc_ids, scores in zip(q_ids, I, D):
             for doc_id, score in zip(doc_ids, scores):
                 orig_doc_id = orig_doc_ids[doc_id]
 

@@ -7,6 +7,7 @@ name: ???
 index_dir: ???
 dataset: ???
 
+query_attribute: text
 metrics: []
 device: cpu
 k: 1000
