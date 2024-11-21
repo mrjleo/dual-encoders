@@ -66,7 +66,7 @@ Validation using ranking metrics is enabled by default (see [ranking-utils](http
 
 Indexing is handled by the `index.py` script, and the corresponding configuration file can be found at `config/indexing.yaml`. Most importantly, the type of index to be created can be controlled using `index_writer`:
 
-- `index_writer=fast_forward` creates a [Fast-Forward OnDiskIndex](https://mrjleo.github.io/fast-forward-indexes/docs/v0.2.0/fast_forward/index/disk.html#OnDiskIndex)
+- `index_writer=fast_forward` creates a [Fast-Forward OnDiskIndex](https://mrjleo.github.io/fast-forward-indexes/docs/v0.5.1/fast_forward/index/disk.html#OnDiskIndex)
 - `index_writer=faiss` creates a [FAISS IndexFlatIP](https://github.com/facebookresearch/faiss/wiki/Faiss-indexes)
 
 Furthermore, the document collection to be indexed is determined using `encoding_data` and the corresponding configuations:
