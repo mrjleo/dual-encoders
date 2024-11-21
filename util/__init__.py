@@ -77,13 +77,18 @@ class StandaloneEncoder(FFEncoder):
         ckpt = torch.load(ckpt_file, map_location=device)
         for k, v in ckpt["state_dict"].items():
 
+            # previous versions of the transformers library included position IDs in the model parameters,
+            # so this workaround is required for loading older checkpoints
+            if k.endswith("embeddings.position_ids"):
+                continue
+
             # remove prefix and dot
             if k.startswith(weights_prefix):
                 sd_enc[k[len(weights_prefix) + 1 :]] = v
             if k.startswith("projection"):
                 sd_proj[k[11:]] = v
 
-        self.encoder.load_state_dict(sd_enc, strict=False)
+        self.encoder.load_state_dict(sd_enc)
         if ckpt["hyper_parameters"].get("projection_size") is not None:
             self.projection = torch.nn.Linear(
                 self.encoder.embedding_dimension,
