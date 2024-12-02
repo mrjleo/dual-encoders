@@ -45,11 +45,7 @@ def main(config: DictConfig) -> None:
     t_index.start()
 
     for ids, d_inputs in tqdm(data_loader):
-        with torch.no_grad():
-            out = doc_encoder.encoder(
-                {k: v.to(config.device) for k, v in d_inputs.items()}
-            )
-        q.put((ids, out.detach().cpu().numpy()))
+        q.put((ids, doc_encoder._encode(d_inputs)))
 
     # sentinel
     q.put(None)

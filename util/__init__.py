@@ -100,11 +100,20 @@ class StandaloneEncoder(FFEncoder):
             self.projection = None
         self.encoder.eval()
 
-    def __call__(self, texts: Sequence[str]) -> np.ndarray:
+    def _encode(self, inputs: Dict[str, torch.Tensor]) -> torch.Tensor:
+        """Encode and normalize tokenized inputs.
+
+        Args:
+            inputs (Dict[str, torch.Tensor]): The tokenized inputs.
+
+        Returns:
+            torch.Tensor: The normalized representations.
+        """
         with torch.no_grad():
-            rep = self.encoder(
-                {k: v.to(self.device) for k, v in self.tokenizer(texts).items()}
-            )
+            rep = self.encoder({k: v.to(self.device) for k, v in inputs.items()})
             if self.projection is not None:
                 rep = self.projection(rep)
             return torch.nn.functional.normalize(rep).detach().numpy()
+
+    def __call__(self, texts: Sequence[str]) -> np.ndarray:
+        return self._encode(self.tokenizer(texts))
