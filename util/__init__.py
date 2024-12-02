@@ -101,7 +101,6 @@ class StandaloneEncoder(FFEncoder):
         self.encoder.eval()
 
     def __call__(self, texts: Sequence[str]) -> np.ndarray:
-        self.encoder.eval()
         with torch.no_grad():
             rep = self.encoder(
                 {k: v.to(self.device) for k, v in self.tokenizer(texts).items()}
