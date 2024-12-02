@@ -49,7 +49,7 @@ def read_faiss_index(index_dir: Path) -> Tuple[faiss.Index, Dict[int, str]]:
 
 class StandaloneEncoder(FFEncoder):
     """Adapter class to use encoders for indexing, retrieval, or re-ranking.
-    Can be used as an encoder for Fast-Forward indexes.
+    Can be used as an encoder for Fast-Forward indexes. Outputs normalized representations.
     """
 
     def __init__(
@@ -100,12 +100,12 @@ class StandaloneEncoder(FFEncoder):
             self.projection = None
         self.encoder.eval()
 
-    def __call__(self, queries: Sequence[str]) -> np.ndarray:
+    def __call__(self, texts: Sequence[str]) -> np.ndarray:
         self.encoder.eval()
         with torch.no_grad():
             rep = self.encoder(
-                {k: v.to(self.device) for k, v in self.tokenizer(queries).items()}
+                {k: v.to(self.device) for k, v in self.tokenizer(texts).items()}
             )
             if self.projection is not None:
                 rep = self.projection(rep)
-            return rep.detach().numpy()
+            return torch.nn.functional.normalize(rep).detach().numpy()
