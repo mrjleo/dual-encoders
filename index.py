@@ -6,7 +6,6 @@ from queue import Queue
 from threading import Thread
 
 import hydra
-import torch
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from tqdm import tqdm
